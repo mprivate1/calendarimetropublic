@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Servicios del Día - Calendariometro</title>
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #eef2f3;
+    margin: 40px auto;
+    max-width: 950px;
+    padding: 20px;
+    color: #333;
+    font-size: 1.1em;
+  }
+  .encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 10px;
+  }
+  .encabezado h1 {
+    flex-grow: 1;
+    text-align: center;
+    margin: 0;
+    font-size: 2.4em;
+    color: #2c3e50;
+  }
+  #fecha {
+    width: 100%;
+    text-align: center;
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #34495e;
+    margin-top: 10px;
+    margin-bottom: 5px;
+  }
+  #letrero {
+    text-align: center;
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #2980b9;
+    margin-bottom: 20px;
+  }
+  .cuadros-turno {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+  }
+  .cuadros-turno > div {
+    display: flex;
+    gap: 10px;
+  }
+  .cuadro {
+    width: 100px;
+    height: 90px;
+    font-size: 1.8em;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    border: 2px solid #ccc;
+    background-color: #ffffff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+  .cuadro.rojo {
+    background-color: red;
+    color: white;
+    width: 100px;
+    height: 90px;
+    font-size: 1.8em;
+  }
+  .cuadro.activo {
+    border: 3px solid red;
+    transform: scale(1.05);
+  }
+  #datePicker {
+    display: block;
+    margin: 10px auto 0 auto;
+    padding: 12px 18px;
+    font-size: 1.1em;
+    border: 2px solid #2980b9;
+    border-radius: 8px;
+    width: 298px;
+  }
+  table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 12px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    text-align: center;
+    margin-bottom: 30px;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+  }
+  table.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  thead {
+    background: #2980b9;
+  }
+  thead th {
+    padding: 15px;
+    color: #fff;
+    font-size: 1.2em;
+    font-weight: 600;
+  }
+  tbody tr:hover {
+    background: #f0f4f8;
+  }
+  tbody td {
+    padding: 14px 16px;
+    font-size: 1.15em;
+    transition: background 0.3s;
+  }
+  .nombre {
+    font-weight: bold;
+  }
+  .servicio {
+    width: 60px;
+    min-width: 60px;
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    border-radius: 8px;
+    font-size: 1em;
+    white-space: nowrap;
+    border: 1px solid transparent;
+  }
+  .servicio-0,
+  .servicio-T, .servicio-t, .servicio-FI, .servicio-FR, .servicio-RM {
+    background-color: #ffffff;
+    border: 1px solid #333;
+    color: #333;
+  }
+  .servicio-0 {
+    color: #ffffff;
+  }
+  .servicio-CC, .servicio-CC1 { background-color: #F8CBAD; color: #333; }
+  .servicio-CE, .servicio-CE1 { background-color: #BDD7EE; color: #333; }
+  .servicio-TL, .servicio-TL1 { background-color: #C6E0B4; color: #333; }
+  .servicio-D, .servicio-F, .servicio-TN, .servicio-T2 { background-color: #333; color: #fff; }
+  .servicio-E, .servicio-P, .servicio-A { background-color: #333; color: #FF0000; }
+  .servicio-V, .servicio-RJ { background-color: #FF6600; color: #333; }
+  .servicio-VA, .servicio-RJA { background-color: #FFC000; color: #333; }
+  .servicio-AS { background-color: #333; color: #ED7D31; }
+  .servicio-otros { background-color: #7f8c8d; color: #fff; font-style: italic; }
+</style>
+</head>
+
+<body>
+
+<div class="encabezado">
+  <div class="cuadro rojo">L1</div>
+  <div style="flex-grow:1;">
+    <h1>Servicios del Día</h1>
+    <div id="fecha"></div>
+    <div id="letrero"></div>
+  </div>
+  <div class="cuadros-turno">
+    <div>
+      <div class="cuadro activo" id="btnT1" onclick="cambiarTurno('T1')">T1</div>
+      <div class="cuadro" id="btnT2" onclick="cambiarTurno('T2')">T2</div>
+      <div class="cuadro" id="btnT3" onclick="cambiarTurno('T3')">T3</div>
+    </div>
+    <input type="date" id="datePicker" />
+  </div>
+</div>
+
+<table id="tabla">
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Servicio</th>
+      <th>Descripción</th>
+    </tr>
+  </thead>
+  <tbody id="tbody1"></tbody>
+  <tbody><tr><td colspan="3" style="height:10px; background:#eef2f3;"></td></tr></tbody>
+  <tbody id="tbody2"></tbody>
+</table>
+
+<script>
+const urlJSON = "https://raw.githubusercontent.com/mprivate1/calendarimetropublic/main/CALENDARIOMETRO2025TOTAL.json";
+let turnoActual = "T1";
+let datosCargados = [];
+
+const orden = ["CC", "CE", "TL", "0", "T", "t", "FI", "FR", "RM", "AS", "F", "D", "P", "V", "RJ", "RJ24", "V24", "E"];
+const grupo1 = ["CC", "CE", "TL", "0", "T", "t", "FI", "FR", "RM"];
+
+const descripcionesServicios = {
+  "0": "Zona Libre",
+  "CC": "Panel de circulación", "CE": "Panel de estaciones", "TL": "Teléfono de personal",
+  "FI": "Impartir formación", "FR": "Formación recibida", "RM": "Revisión médica",
+  "AS": "Asunto sindical", "F": "Fiesta", "D": "Descanso", "P": "Permiso",
+  "V": "Vacaciones", "RJ": "Reducción de jornada", "RJ24": "Reducción 24h", "V24": "Vacaciones 24h", "E": "Enfermedad"
+};
+
+function diaSemana(date) {
+  return ["domingo","lunes","martes","miércoles","jueves","viernes","sábado"][date.getDay()];
+}
+
+function formatearFecha(date) {
+  return `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth()+1).padStart(2, '0')}/${date.getFullYear()}`;
+}
+
+function actualizarLetrero(fechaStr) {
+  const hoy = new Date();
+  const manana = new Date();
+  manana.setDate(hoy.getDate() + 1);
+
+  const formato = f => `${String(f.getDate()).padStart(2, '0')}/${String(f.getMonth()+1).padStart(2, '0')}/${f.getFullYear()}`;
+
+  if (fechaStr === formato(hoy)) {
+    document.getElementById('letrero').textContent = "HOY";
+  } else if (fechaStr === formato(manana)) {
+    document.getElementById('letrero').textContent = "MAÑANA";
+  } else {
+    document.getElementById('letrero').textContent = "";
+  }
+}
+
+async function cargarServicios(fechaStr) {
+  try {
+    const response = await fetch(urlJSON);
+    if (!response.ok) throw new Error("Error al cargar datos");
+    const data = await response.json();
+    datosCargados = data.filter(r => r.fecha === fechaStr && r.turno === turnoActual);
+    dibujarTabla();
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function dibujarTabla() {
+  const serviciosFiltrados = datosCargados;
+  serviciosFiltrados.sort((a, b) => orden.indexOf(normalizarServicio(a.servicio)) - orden.indexOf(normalizarServicio(b.servicio)));
+
+  const tbody1 = document.getElementById('tbody1');
+  const tbody2 = document.getElementById('tbody2');
+  const tabla = document.getElementById('tabla');
+
+  tbody1.innerHTML = '';
+  tbody2.innerHTML = '';
+
+  serviciosFiltrados.forEach(r => {
+    const base = normalizarServicio(r.servicio);
+    let clase = `servicio-${base}`;
+    let textoServicio = r.servicio;
+    let descripcion = descripcionesServicios[base] || "No especificado";
+
+    if (base === "0") {
+      clase = "servicio-0";
+      textoServicio = "";
+      descripcion = "Zona Libre";
+    }
+    const fila = `<tr><td class="nombre">${r.nombre}</td><td><div class="servicio ${clase}">${textoServicio}</div></td><td>${descripcion}</td></tr>`;
+    (grupo1.includes(base) ? tbody1 : tbody2).insertAdjacentHTML('beforeend', fila);
+  });
+
+  tabla.classList.add('visible');
+}
+
+function cambiarTurno(turno) {
+  turnoActual = turno;
+  document.querySelectorAll('.cuadro').forEach(btn => btn.classList.remove('activo'));
+  document.getElementById(`btn${turno}`).classList.add('activo');
+  const [yyyy, mm, dd] = document.getElementById('datePicker').value.split('-');
+  const fechaStr = `${dd}/${mm}/${yyyy}`;
+  cargarServicios(fechaStr);
+}
+
+function normalizarServicio(servicio) {
+  if (servicio === "0") return "0";
+  return servicio.replace(/[0-9]+$/g, '').toUpperCase();
+}
+
+// Inicialización
+const dateInput = document.getElementById('datePicker');
+const hoy = new Date();
+const fechaFormateada = formatearFecha(hoy);
+dateInput.value = hoy.toISOString().split('T')[0];
+document.getElementById('fecha').textContent = `${diaSemana(hoy)}, ${fechaFormateada}`;
+actualizarLetrero(fechaFormateada);
+cargarServicios(fechaFormateada);
+
+dateInput.addEventListener('change', () => {
+  const [yyyy, mm, dd] = dateInput.value.split('-');
+  const fechaStr = `${dd}/${mm}/${yyyy}`;
+  const fechaDate = new Date(`${yyyy}-${mm}-${dd}`);
+  document.getElementById('fecha').textContent = `${diaSemana(fechaDate)}, ${fechaStr}`;
+  actualizarLetrero(fechaStr);
+  cargarServicios(fechaStr);
+});
+</script>
+
+</body>
+</html>
